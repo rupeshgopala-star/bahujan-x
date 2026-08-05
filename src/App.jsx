@@ -1152,14 +1152,19 @@ export default function App() {
                   alert("Logo upload failed: " + err.message);
                 }
               }} 
-              className="text-xs text-slate-400" 
-            />
-          <button onClick={() => alert('Logo settings saved!')} className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Save Logo</button>
-        </div>
-      )}
-
-      {/* Onboarding */}
-      {adminTab === 'onboarding' && (
+              className="text-xs text-slate-400"
+                          />
+                          <button 
+                            onClick={() => alert('Logo settings saved!')} 
+                            className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs"
+                          >
+                            Save Logo
+                          </button>
+                        </div>
+                      )}
+              
+                      {/* Onboarding */}
+                      {adminTab === 'onboarding' && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
           <h2 className="text-xs font-bold text-amber-400 uppercase">Onboarding Screens (3 steps)</h2>
           {onboardingContent.map((ob, idx) => (
