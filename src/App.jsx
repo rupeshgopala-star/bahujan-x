@@ -1258,36 +1258,125 @@ const startEditReformer = (leader) => {
       </div>
 
       {/* Splash & Quotes */}
-      {adminTab === 'splash_quote' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
-          <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Opening Animation & Quote Settings</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">App Title Name</label>
-              <input type="text" value={appConfig.splashTitle} onChange={(e) => setAppConfig({ ...appConfig, splashTitle: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Opening Tagline</label>
-              <input type="text" value={appConfig.splashTagline} onChange={(e) => setAppConfig({ ...appConfig, splashTagline: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
-            </div>
-            <div className="pt-2 border-t border-slate-800">
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Quote of the Day</label>
-              <textarea value={appConfig.quoteOfTheDay} onChange={(e) => setAppConfig({ ...appConfig, quoteOfTheDay: e.target.value })} rows={2}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white resize-none" />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Quote Author</label>
-              <input type="text" value={appConfig.quoteAuthor} onChange={(e) => setAppConfig({ ...appConfig, quoteAuthor: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
-            </div>
-            <button onClick={() => alert('Saved live!')} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1">
-              <CheckCircle className="w-4 h-4" /> <span>Save Changes</span>
-            </button>
-          </div>
+{adminTab === 'splash_quote' && (
+  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+    <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+      Opening Animation & Quote Settings
+    </h2>
+
+    <div className="space-y-3">
+      {/* App Title */}
+      <div>
+        <label className="text-xs font-semibold text-slate-300 block mb-1">App Title Name</label>
+        <input
+          type="text"
+          value={appConfig.splashTitle}
+          onChange={(e) => setAppConfig({ ...appConfig, splashTitle: e.target.value })}
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+        />
+      </div>
+
+      {/* Opening Tagline */}
+      <div>
+        <label className="text-xs font-semibold text-slate-300 block mb-1">Opening Tagline</label>
+        <input
+          type="text"
+          value={appConfig.splashTagline}
+          onChange={(e) => setAppConfig({ ...appConfig, splashTagline: e.target.value })}
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+        />
+      </div>
+
+      <div className="pt-2 border-t border-slate-800 space-y-3">
+        {/* Quote of the Day */}
+        <div>
+          <label className="text-xs font-semibold text-slate-300 block mb-1">Quote of the Day</label>
+          <textarea
+            value={appConfig.quoteOfTheDay}
+            onChange={(e) => setAppConfig({ ...appConfig, quoteOfTheDay: e.target.value })}
+            rows={2}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white resize-none"
+          />
         </div>
-      )}
+
+        {/* Quote Author */}
+        <div>
+          <label className="text-xs font-semibold text-slate-300 block mb-1">Quote Author</label>
+          <input
+            type="text"
+            value={appConfig.quoteAuthor}
+            onChange={(e) => setAppConfig({ ...appConfig, quoteAuthor: e.target.value })}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+          />
+        </div>
+
+        {/* ========== IMAGE UPLOAD / DELETE SECTION ========== */}
+        <div>
+          <label className="text-xs font-semibold text-slate-300 block mb-1">Quote Image</label>
+
+          {/* Current Image Preview */}
+          {appConfig.quoteImage ? (
+            <div className="flex items-center gap-3 mb-2">
+              <img
+                src={appConfig.quoteImage}
+                alt="Quote"
+                className="w-16 h-16 rounded-full object-cover border-2 border-amber-400/50"
+              />
+              <button
+                onClick={() => {
+                  if (confirm("Quote image delete karna hai?")) {
+                    setAppConfig({ ...appConfig, quoteImage: "" });
+                  }
+                }}
+                className="bg-red-600/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Delete Image
+              </button>
+            </div>
+          ) : (
+            <p className="text-[11px] text-slate-500 mb-2">No image selected</p>
+          )}
+
+          {/* Upload new image */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              try {
+                const url = await uploadToCloudinary(file);
+                setAppConfig((prev) => ({ ...prev, quoteImage: url }));
+                alert("✅ Quote image uploaded!");
+              } catch (err) {
+                alert("Upload failed: " + err.message);
+              }
+            }}
+            className="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:text-xs file:font-bold"
+          />
+
+          {/* Manual URL option */}
+          <input
+            type="text"
+            value={appConfig.quoteImage || ""}
+            onChange={(e) => setAppConfig({ ...appConfig, quoteImage: e.target.value })}
+            placeholder="Ya image URL paste karo..."
+            className="w-full mt-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+          />
+        </div>
+      </div>
+
+      {/* REAL SAVE BUTTON */}
+      <button
+        onClick={saveAllSettings}
+        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5"
+      >
+        <CheckCircle className="w-4 h-4" />
+        <span>Save Changes (Permanent)</span>
+      </button>
+    </div>
+  </div>
+)}
 
       {/* Logo & Branding */}
 {adminTab === 'logo_brand' && (
