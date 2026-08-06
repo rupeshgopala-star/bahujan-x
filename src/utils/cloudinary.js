@@ -1,15 +1,15 @@
-const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-
 export const uploadToCloudinary = async (file) => {
   if (!file) throw new Error("No file selected");
+
+  const cloudName = "wmj1pcqk";
+  const uploadPreset = "bahujan_x";
 
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", uploadPreset);
 
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
     {
       method: "POST",
       body: formData,
