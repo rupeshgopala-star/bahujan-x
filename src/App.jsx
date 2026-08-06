@@ -1450,27 +1450,153 @@ const startEditReformer = (leader) => {
 )}
               
                       {/* Onboarding */}
-                      {adminTab === 'onboarding' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
-          <h2 className="text-xs font-bold text-amber-400 uppercase">Onboarding Screens (3 steps)</h2>
-          {onboardingContent.map((ob, idx) => (
-            <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-              <p className="text-xs text-amber-400 font-bold">Step {ob.step}</p>
-              <input type="text" value={ob.title} onChange={(e) => {
+{adminTab === 'onboarding' && (
+  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+    <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+      Onboarding Screens (3 Steps)
+    </h2>
+
+    {onboardingContent.map((ob, idx) => (
+      <div key={idx} className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-amber-400 font-bold">Step {ob.step}</p>
+          <button
+            onClick={() => {
+              if (confirm(`Step ${ob.step} ka content clear karna hai?`)) {
                 const updated = [...onboardingContent];
-                updated[idx].title = e.target.value;
+                updated[idx] = { ...updated[idx], title: '', desc: '', image: '', icon: '' };
                 setOnboardingContent(updated);
-              }} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white" />
-              <textarea value={ob.desc} onChange={(e) => {
-                const updated = [...onboardingContent];
-                updated[idx].desc = e.target.value;
-                setOnboardingContent(updated);
-              }} rows={2} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white" />
-            </div>
-          ))}
-          <button onClick={saveAllSettings} className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Save Onboarding</button>
+              }
+            }}
+            className="text-[10px] bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg font-bold flex items-center gap-1"
+          >
+            <Trash2 className="w-3 h-3" /> Clear
+          </button>
         </div>
-      )}
+
+        {/* Title */}
+        <div>
+          <label className="text-[10px] text-slate-400 block mb-1">Title</label>
+          <input
+            type="text"
+            value={ob.title}
+            onChange={(e) => {
+              const updated = [...onboardingContent];
+              updated[idx].title = e.target.value;
+              setOnboardingContent(updated);
+            }}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+            placeholder="Step title..."
+          />
+        </div>
+
+        {/* Description / Thought */}
+        <div>
+          <label className="text-[10px] text-slate-400 block mb-1">Description / Thought</label>
+          <textarea
+            value={ob.desc}
+            onChange={(e) => {
+              const updated = [...onboardingContent];
+              updated[idx].desc = e.target.value;
+              setOnboardingContent(updated);
+            }}
+            rows={3}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white resize-none"
+            placeholder="Is step ka vichar / description..."
+          />
+        </div>
+
+        {/* Icon Text (fallback) */}
+        <div>
+          <label className="text-[10px] text-slate-400 block mb-1">Icon Text (agar image nahi hai)</label>
+          <input
+            type="text"
+            value={ob.icon || ''}
+            onChange={(e) => {
+              const updated = [...onboardingContent];
+              updated[idx].icon = e.target.value;
+              setOnboardingContent(updated);
+            }}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+            placeholder="B / book / heart..."
+          />
+        </div>
+
+        {/* ========== IMAGE UPLOAD / DELETE ========== */}
+        <div>
+          <label className="text-[10px] text-slate-400 block mb-1">Step Image</label>
+
+          {ob.image ? (
+            <div className="flex items-center gap-3 mb-2">
+              <img
+                src={ob.image}
+                alt={`Step ${ob.step}`}
+                className="w-16 h-16 rounded-xl object-cover border border-amber-400/40"
+              />
+              <button
+                onClick={() => {
+                  if (confirm("Is step ki image delete karni hai?")) {
+                    const updated = [...onboardingContent];
+                    updated[idx].image = '';
+                    setOnboardingContent(updated);
+                  }
+                }}
+                className="bg-red-600/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Delete Image
+              </button>
+            </div>
+          ) : (
+            <p className="text-[11px] text-slate-500 mb-2">No image selected</p>
+          )}
+
+          {/* Upload */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              try {
+                const url = await uploadToCloudinary(file);
+                const updated = [...onboardingContent];
+                updated[idx].image = url;
+                setOnboardingContent(updated);
+                alert(`✅ Step ${ob.step} image uploaded!`);
+              } catch (err) {
+                alert("Upload failed: " + err.message);
+              }
+            }}
+            className="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:text-xs file:font-bold"
+          />
+
+          {/* Manual URL */}
+          <input
+            type="text"
+            value={ob.image || ''}
+            onChange={(e) => {
+              const updated = [...onboardingContent];
+              updated[idx].image = e.target.value;
+              setOnboardingContent(updated);
+            }}
+            placeholder="Ya image URL paste karo..."
+            className="w-full mt-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+          />
+        </div>
+      </div>
+    ))}
+
+    {/* Save Button */}
+    <button
+      onClick={saveAllSettings}
+      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5"
+    >
+      <CheckCircle className="w-4 h-4" />
+      <span>Save Onboarding (Permanent)</span>
+    </button>
+  </div>
+)}
 
       {/* Home Icons */}
       {adminTab === 'home_icons' && (
