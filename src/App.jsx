@@ -1124,44 +1124,57 @@ export default function App() {
       )}
 
       {/* Logo & Branding */}
-      {adminTab === 'logo_brand' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
-          <h2 className="text-xs font-bold text-amber-400 uppercase">Logo & Branding</h2>
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Logo Text (fallback)</label>
-            <input type="text" value={appConfig.logoText} onChange={(e) => setAppConfig({...appConfig, logoText: e.target.value})}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Logo Image URL</label>
-            <input type="text" value={appConfig.logoUrl} onChange={(e) => setAppConfig({...appConfig, logoUrl: e.target.value})}
-              placeholder="https://..." className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
-          </div>
-          <div>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={async (e) => {
-                const f = e.target.files[0];
-                if (!f) return;
-                try {
-                  const url = await uploadToCloudinary(f);
-                  setAppConfig(prev => ({ ...prev, logoUrl: url }));
-                  alert("✅ Logo uploaded successfully!");
-                } catch (err) {
-                  alert("Logo upload failed: " + err.message);
-                }
-              }} 
-              className="text-xs text-slate-400"
-                          />
-                          <button 
-                            onClick={() => alert('Logo settings saved!')} 
-                            className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs"
-                          >
-                            Save Logo
-                          </button>
-                        </div>
-                      )}
+{adminTab === 'logo_brand' && (
+  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+    <h2 className="text-xs font-bold text-amber-400 uppercase">Logo & Branding</h2>
+    
+    <div>
+      <label className="text-xs font-semibold text-slate-300 block mb-1">Logo Text (fallback)</label>
+      <input 
+        type="text" 
+        value={appConfig.logoText} 
+        onChange={(e) => setAppConfig({...appConfig, logoText: e.target.value})}
+        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" 
+      />
+    </div>
+
+    <div>
+      <label className="text-xs font-semibold text-slate-300 block mb-1">Logo Image URL</label>
+      <input 
+        type="text" 
+        value={appConfig.logoUrl} 
+        onChange={(e) => setAppConfig({...appConfig, logoUrl: e.target.value})}
+        placeholder="https://..." 
+        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" 
+      />
+    </div>
+
+    <div>
+      <input 
+        type="file" 
+        accept="image/*" 
+        onChange={async (e) => {
+          const f = e.target.files[0];
+          if (!f) return;
+          try {
+            const url = await uploadToCloudinary(f);
+            setAppConfig(prev => ({ ...prev, logoUrl: url }));
+            alert("✅ Logo uploaded successfully!");
+          } catch (err) {
+            alert("Logo upload failed: " + err.message);
+          }
+        }} 
+        className="text-xs text-slate-400"
+      />
+      <button 
+        onClick={() => alert('Logo settings saved!')} 
+        className="mt-2 bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs"
+      >
+        Save Logo
+      </button>
+    </div>
+  </div>
+)}
               
                       {/* Onboarding */}
                       {adminTab === 'onboarding' && (
