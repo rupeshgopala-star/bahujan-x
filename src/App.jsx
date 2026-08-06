@@ -498,9 +498,13 @@ const saveAllSettings = async () => {
   const renderHeader = () => (
     <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
       <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('home')}>
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-amber-400 font-black text-lg shadow">
-          {appConfig.logoText || 'B'}
-        </div>
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-amber-400 font-black text-lg shadow overflow-hidden">
+  {appConfig.logoUrl ? (
+    <img src={appConfig.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+  ) : (
+    <span>{appConfig.logoText || 'B'}</span>
+  )}
+</div>
         <div>
           <span className="font-bold text-sm text-white tracking-wide block">{appConfig.splashTitle}</span>
           <span className="text-[9px] text-amber-400 font-medium">Mission & Knowledge</span>
