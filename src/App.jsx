@@ -511,16 +511,28 @@ const startEditReformer = (leader) => {
         <button onClick={() => setCurrentScreen('app')} className="text-slate-400 hover:text-white text-xs font-medium">Skip Intro</button>
       </div>
       <div className="flex flex-col items-center text-center my-auto space-y-6">
-        <div className="w-56 h-56 rounded-full bg-gradient-to-b from-blue-600/20 to-amber-500/10 border border-blue-500/30 flex items-center justify-center p-4 relative shadow-2xl">
-          {onboardingStep === 1 && (
-            <div className="text-center space-y-2">
-              <div className="w-20 h-20 mx-auto rounded-full bg-blue-600/30 border border-blue-400 flex items-center justify-center text-3xl font-black text-amber-400">{onboardingContent[0]?.icon || 'B'}</div>
-              <p className="text-lg font-bold text-white">{onboardingContent[0]?.title}</p>
-            </div>
-          )}
-          {onboardingStep === 2 && <BookOpen className="w-24 h-24 text-blue-400 animate-pulse" />}
-          {onboardingStep === 3 && <HeartHandshake className="w-24 h-24 text-amber-400 animate-bounce" />}
+        <div className="w-56 h-56 rounded-full bg-gradient-to-b from-blue-600/20 to-amber-500/10 border border-blue-500/30 flex items-center justify-center p-4 relative shadow-2xl overflow-hidden">
+  {onboardingContent[onboardingStep - 1]?.image ? (
+    <img
+      src={onboardingContent[onboardingStep - 1].image}
+      alt="Onboarding"
+      className="w-full h-full object-cover rounded-full"
+    />
+  ) : (
+    <>
+      {onboardingStep === 1 && (
+        <div className="text-center space-y-2">
+          <div className="w-20 h-20 mx-auto rounded-full bg-blue-600/30 border border-blue-400 flex items-center justify-center text-3xl font-black text-amber-400">
+            {onboardingContent[0]?.icon || 'B'}
+          </div>
+          <p className="text-lg font-bold text-white">{onboardingContent[0]?.title}</p>
         </div>
+      )}
+      {onboardingStep === 2 && <BookOpen className="w-24 h-24 text-blue-400 animate-pulse" />}
+      {onboardingStep === 3 && <HeartHandshake className="w-24 h-24 text-amber-400 animate-bounce" />}
+    </>
+  )}
+</div>
         <div>
           <h2 className="text-2xl font-bold text-white mb-2">{onboardingContent[onboardingStep - 1]?.title}</h2>
           <p className="text-slate-400 text-xs max-w-xs leading-relaxed">{onboardingContent[onboardingStep - 1]?.desc}</p>
