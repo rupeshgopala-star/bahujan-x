@@ -242,13 +242,13 @@ export default function App() {
 
   // ==================== HELPERS ====================
   const openUPI = (amount) => {
-    const upi = appConfig.upiId || 'rikive@upi';
-    const url = `upi://pay?pa=\( {upi}&pn=Bahujan%20X&am= \){amount}&cu=INR&tn=Mission%20Support`;
-    window.location.href = url;
-    setTimeout(() => {
-      alert(`UPI app open ho raha hai...\nUPI ID: \( {upi}\nAmount: ₹ \){amount}`);
-    }, 600);
-  };
+  const upi = appConfig.upiId || 'rikive@upi';
+  const url = `upi://pay?pa=\( {upi}&pn=Bahujan%20X&am= \){amount}&cu=INR&tn=Mission%20Support`;
+  window.location.href = url;
+  setTimeout(() => {
+    alert(`UPI app open ho raha hai...\nUPI ID: \( {upi}\nAmount: ₹ \){amount}`);
+  }, 600);
+};
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
