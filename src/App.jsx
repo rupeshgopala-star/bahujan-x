@@ -433,9 +433,13 @@ const saveAllSettings = async () => {
       </button>
       
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-amber-400 text-3xl font-black mb-3 shadow-lg">
-          {appConfig.logoText || 'B'}
-        </div>
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-amber-400 text-3xl font-black mb-3 shadow-lg overflow-hidden">
+  {appConfig.logoUrl ? (
+    <img src={appConfig.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+  ) : (
+    <span>{appConfig.logoText || 'B'}</span>
+  )}
+</div>
         <h1 className="text-2xl font-bold">{authMode === 'login' ? 'Welcome to Bahujan X' : 'Create Account'}</h1>
         <p className="text-slate-400 text-xs mt-1">Aapke apne Samajik & Shiksha Platform me swagat hai</p>
       </div>
