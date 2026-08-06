@@ -1599,15 +1599,145 @@ const startEditReformer = (leader) => {
 
       {/* Content */}
       {adminTab === 'content' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
-          <h2 className="text-xs font-bold text-amber-400 uppercase">Mahapurush & Books Management</h2>
-          <div className="grid grid-cols-3 gap-2">
-            <button onClick={() => alert("Add Reformer - Upload Center use karein")} className="bg-blue-600/20 text-blue-300 border border-blue-500/30 p-2.5 rounded-xl text-xs font-bold">+ Add Reformer</button>
-            <button onClick={() => setAdminTab('upload')} className="bg-amber-600/20 text-amber-300 border border-amber-500/30 p-2.5 rounded-xl text-xs font-bold">+ Upload E-Book</button>
-            <button onClick={() => setAdminTab('upload')} className="bg-purple-600/20 text-purple-300 border border-purple-500/30 p-2.5 rounded-xl text-xs font-bold">+ Add Video</button>
+  <div className="space-y-4">
+    
+    {/* Buttons */}
+    <div className="flex flex-wrap gap-2">
+      <button 
+        onClick={() => { resetReformerForm(); setShowAddReformer(true); }}
+        className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-xs"
+      >
+        + Add Reformer
+      </button>
+    </div>
+
+    {/* Add / Edit Form */}
+    {showAddReformer && (
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h3 className="text-sm font-bold text-amber-400">
+          {editingReformer ? 'Edit Reformer' : 'Add New Reformer'}
+        </h3>
+
+        <input 
+          type="text" 
+          placeholder="Full Name (e.g. Dr. B. R. Ambedkar)"
+          value={reformerForm.name}
+          onChange={(e) => setReformerForm({...reformerForm, name: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+        />
+
+        <input 
+          type="text" 
+          placeholder="Title (e.g. Babasaheb / Constitution Maker)"
+          value={reformerForm.title}
+          onChange={(e) => setReformerForm({...reformerForm, title: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+        />
+
+        <input 
+          type="text" 
+          placeholder="Years (e.g. 1891 - 1956)"
+          value={reformerForm.years}
+          onChange={(e) => setReformerForm({...reformerForm, years: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+        />
+
+        <textarea 
+          placeholder="Biography"
+          value={reformerForm.bio}
+          onChange={(e) => setReformerForm({...reformerForm, bio: e.target.value})}
+          rows={3}
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
+        />
+
+        <input 
+          type="text" 
+          placeholder="Famous Quote"
+          value={reformerForm.quotes}
+          onChange={(e) => setReformerForm({...reformerForm, quotes: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+        />
+
+        {/* Image Upload */}
+        <div className="space-y-2">
+          <p className="text-xs text-slate-400">Main Photo</p>
+          <input 
+            type="file" 
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              try {
+                setReformerForm(prev => ({...prev, uploading: true}));
+                const url = await uploadToCloudinary(file);
+                setReformerForm(prev => ({...prev, image: url, uploading: false}));
+              } catch (err) {
+                alert("Upload failed");
+                setReformerForm(prev => ({...prev, uploading: false}));
+              }
+            }}
+            className="text-xs text-slate-400"
+          />
+          {reformerForm.uploading && <p className="text-xs text-amber-400">Uploading...</p>}
+          {reformerForm.image && (
+            <img src={reformerForm.image} alt="Preview" className="w-20 h-20 object-cover rounded-xl" />
+          )}
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <button 
+            onClick={saveReformer}
+            className="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs"
+          >
+            {editingReformer ? 'Update Reformer' : 'Save Reformer'}
+          </button>
+          <button 
+            onClick={resetReformerForm}
+            className="px-4 bg-slate-700 text-white font-bold py-2 rounded-xl text-xs"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* Existing Leaders List */}
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+      <h3 className="text-xs font-bold text-white">Current Leaders ({mahapurushList.length})</h3>
+      
+      {mahapurushList.map((leader) => (
+        <div key={leader.id} className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <div className="flex items-center gap-3">
+            <img 
+              src={leader.image || 'https://via.placeholder.com/50'} 
+              alt={leader.name}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <div>
+              <p className="text-xs font-bold text-white">{leader.name}</p>
+              <p className="text-[10px] text-slate-400">{leader.title}</p>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <button 
+              onClick={() => startEditReformer(leader)}
+              className="p-2 bg-blue-600/20 text-blue-400 rounded-lg"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => deleteReformer(leader.id)}
+              className="p-2 bg-red-600/20 text-red-400 rounded-lg"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           </div>
         </div>
-      )}
+      ))}
+    </div>
+  </div>
+)}
 
       {/* Security PIN */}
       {adminTab === 'security' && (
