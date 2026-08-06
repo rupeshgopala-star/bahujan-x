@@ -237,6 +237,18 @@ export default function App() {
   const [profileEditMode, setProfileEditMode] = useState(false);
   const [newAdminPin, setNewAdminPin] = useState('');
   const [confirmAdminPin, setConfirmAdminPin] = useState('');
+const [showAddReformer, setShowAddReformer] = useState(false);
+const [editingReformer, setEditingReformer] = useState(null);
+
+const [reformerForm, setReformerForm] = useState({
+  name: '',
+  title: '',
+  years: '',
+  bio: '',
+  quotes: '',
+  image: '',
+  uploading: false
+});
 
   // Splash timer
   useEffect(() => {
@@ -356,6 +368,94 @@ const saveAllSettings = async () => {
     console.error(err);
     alert("❌ Save failed: " + err.message);
   }
+};
+const resetReformerForm = () => {
+  setReformerForm({
+    name: '',
+    title: '',
+    years: '',
+    bio: '',
+    quotes: '',
+    image: '',
+    uploading: false
+  });
+  setEditingReformer(null);
+  setShowAddReformer(false);
+};
+const saveReformer = async () => {
+  if (!reformerForm.name.trim()) {
+    alert("Name required");
+    return;
+  }
+
+  try {
+    let updatedList;
+
+    if (editingReformer) {
+      // Edit mode
+      updatedList = mahapurushList.map(item => 
+        item.id === editingReformer.id 
+          ? { ...item, ...reformerForm, id: editingReformer.id }
+          : item
+      );
+    } else {
+      // Add mode
+      const newReformer = {
+        id: Date.now().toString(),
+        ...reformerForm,
+        timeline: [],
+        images: [],
+        videos: [],
+        books: [],
+        pdfs: []
+      };
+      updatedList = [...mahapurushList, newReformer];
+    }
+
+    setMahapurushList(updatedList);
+
+    // Firestore me save
+    await setDoc(doc(db, "settings", "appConfig"), {
+      mahapurushList: updatedList,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    alert(editingReformer ? "✅ Reformer updated!" : "✅ Reformer added!");
+    resetReformerForm();
+
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+};
+const deleteReformer = async (id) => {
+  if (!confirm("Kya aap is leader ko delete karna chahte ho?")) return;
+
+  try {
+    const updatedList = mahapurushList.filter(item => item.id !== id);
+    setMahapurushList(updatedList);
+
+    await setDoc(doc(db, "settings", "appConfig"), {
+      mahapurushList: updatedList,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    alert("✅ Deleted successfully");
+  } catch (err) {
+    alert("Delete failed: " + err.message);
+  }
+};
+const startEditReformer = (leader) => {
+  setEditingReformer(leader);
+  setReformerForm({
+    name: leader.name || '',
+    title: leader.title || '',
+    years: leader.years || '',
+    bio: leader.bio || '',
+    quotes: leader.quotes || '',
+    image: leader.image || '',
+    uploading: false
+  });
+  setShowAddReformer(true);
 };
 
   // ==================== SPLASH ====================
