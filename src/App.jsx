@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { db } from './firebase';
+import { 
+  doc, 
+  getDoc, 
+  setDoc 
+} from 'firebase/firestore';
 import { uploadToCloudinary } from './utils/cloudinary';
 import { 
   Home, BookOpen, Video, FileText, User, Search, Bell, Bookmark, Download, 
@@ -240,6 +246,34 @@ export default function App() {
     }
   }, [currentScreen]);
 
+// ==================== LOAD DATA FROM FIRESTORE ====================
+useEffect(() => {
+  const loadData = async () => {
+    try {
+      const docRef = doc(db, "settings", "appConfig");
+      const snap = await getDoc(docRef);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.appConfig) setAppConfig(data.appConfig);
+        if (data.onboardingContent) setOnboardingContent(data.onboardingContent);
+        if (data.homeIcons) setHomeIcons(data.homeIcons);
+        if (data.customPages) setCustomPages(data.customPages);
+        if (data.socialLinks) setSocialLinks(data.socialLinks);
+        if (data.mahapurushList) setMahapurushList(data.mahapurushList);
+        if (data.videosList) setVideosList(data.videosList);
+        if (data.booksList) setBooksList(data.booksList);
+        if (data.communityPosts) setCommunityPosts(data.communityPosts);
+        console.log("✅ Data loaded from Firestore");
+      }
+    } catch (err) {
+      console.error("Load error:", err);
+    }
+  };
+
+  loadData();
+}, []);
+
   // ==================== HELPERS ====================
   const openUPI = (amount) => {
   const upi = appConfig.upiId || 'rikive@upi';
@@ -300,6 +334,29 @@ export default function App() {
   const downloadToDevice = (item) => {
     alert(`"${item.title || item}" download shuru...\nFile aapke device Downloads folder me save hogi.`);
   };
+
+const saveAllSettings = async () => {
+  try {
+    const docRef = doc(db, "settings", "appConfig");
+    await setDoc(docRef, {
+      appConfig,
+      onboardingContent,
+      homeIcons,
+      customPages,
+      socialLinks,
+      mahapurushList,
+      videosList,
+      booksList,
+      communityPosts,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    alert("✅ Settings permanently saved!");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Save failed: " + err.message);
+  }
+};
 
   // ==================== SPLASH ====================
   const renderSplash = () => (
@@ -1168,7 +1225,7 @@ export default function App() {
         className="text-xs text-slate-400"
       />
       <button 
-        onClick={() => alert('Logo settings saved!')} 
+        onClick={saveAllSettings}
         className="mt-2 bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs"
       >
         Save Logo
@@ -1196,7 +1253,7 @@ export default function App() {
               }} rows={2} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white" />
             </div>
           ))}
-          <button onClick={() => alert('Onboarding content saved!')} className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Save Onboarding</button>
+          <button onClick={saveAllSettings} className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Save Onboarding</button>
         </div>
       )}
 
@@ -1214,7 +1271,7 @@ export default function App() {
               }} className="w-28 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" />
             </div>
           ))}
-          <button onClick={() => alert('Home icons saved!')} className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Save Icons</button>
+          <button onClick={saveAllSettings} className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Save Icons</button>
         </div>
       )}
 
