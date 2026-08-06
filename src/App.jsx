@@ -179,10 +179,28 @@ export default function App() {
 
   // ==================== NEW STATES ====================
   const [onboardingContent, setOnboardingContent] = useState([
-    { step: 1, title: 'Mahapurushon Ke Vichar', desc: 'Dr. Ambedkar, Jyotirao Phule aur Anya Bahujan Nayakon ki jeevani aur vichardhara ko vistar se jaanein.', icon: 'B' },
-    { step: 2, title: 'Free Digital Library & PDFs', desc: 'Itihasik kitabein, Audiobooks aur Research papers padhein aur download karein bina kisi shulk ke.', icon: 'book' },
-    { step: 3, title: 'Community & Support Mission', desc: 'Apne vichar share karein, samajik mission me sahayog (Donate) karein aur sangathit rahein.', icon: 'heart' }
-  ]);
+  { 
+    step: 1, 
+    title: 'Mahapurushon Ke Vichar', 
+    desc: 'Dr. Ambedkar, Jyotirao Phule aur Anya Bahujan Nayakon ki jeevani aur vichardhara ko vistar se jaanein.', 
+    icon: 'B',
+    image: '' 
+  },
+  { 
+    step: 2, 
+    title: 'Free Digital Library & PDFs', 
+    desc: 'Itihasik kitabein, Audiobooks aur Research papers padhein aur download karein bina kisi shulk ke.', 
+    icon: 'book',
+    image: '' 
+  },
+  { 
+    step: 3, 
+    title: 'Community & Support Mission', 
+    desc: 'Apne vichar share karein, samajik mission me sahayog (Donate) karein aur sangathit rahein.', 
+    icon: 'heart',
+    image: '' 
+  }
+]);
 
   const [homeIcons, setHomeIcons] = useState([
     { id: 'i1', label: 'Mahapurush', icon: 'User', color: 'text-blue-400', tab: 'mahapurush' },
