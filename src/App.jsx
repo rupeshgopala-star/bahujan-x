@@ -5,8 +5,7 @@ import {
   getDoc, 
   setDoc 
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "./firebase";
+import { uploadToCloudinary } from './utils/cloudinary';
 import { 
   Home, BookOpen, Video, FileText, User, Search, Bell, Bookmark, Download, 
   Settings, LogOut, ChevronRight, Play, Heart, Share2, MessageSquare, Plus, 
@@ -355,39 +354,7 @@ if (data.ebookBooks) setEbookBooks(data.ebookBooks);
   }, 600);
 };
 
-// ==================== FIREBASE STORAGE UPLOAD (Sab jagah use hoga) ====================
-const uploadToFirebase = (file, folder = "uploads") => {
-  return new Promise((resolve, reject) => {
-    if (!file) {
-      reject(new Error("No file selected"));
-      return;
-    }
 
-    const fileName = `\( {Date.now()}_ \){file.name.replace(/\s+/g, '_')}`;
-    const storageRef = ref(storage, `\( {folder}/ \){fileName}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        setUploadProgress(progress);
-      },
-      (error) => {
-        console.error("Upload error:", error);
-        reject(error);
-      },
-      async () => {
-        try {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve(downloadURL);
-        } catch (err) {
-          reject(err);
-        }
-      }
-    );
-  });
-};
 
   const handleFileUpload = async (e) => {
   const file = e.target.files[0];
@@ -402,21 +369,10 @@ const uploadToFirebase = (file, folder = "uploads") => {
       imageUrl: ''
     }));
 
-    // Folder decide karo type ke hisaab se
-    let folder = "uploads";
-    if (uploadForm.type === "video") folder = "videos";
-    else if (uploadForm.type === "pdf" || uploadForm.type === "book") folder = "pdfs";
-    else if (uploadForm.type === "image") folder = "images";
+    const url = await uploadToCloudinary(file);
 
-    const url = await uploadToFirebase(file, folder);
-
-    setUploadForm(prev => ({
-      ...prev,
-      imageUrl: url,
-      uploading: false
-    }));
-
-    alert("✅ Uploaded successfully to Firebase!\n\n" + url);
+...
+alert("✅ Uploaded successfully to Cloudinary!\n\n" + url);
 
   } catch (error) {
     console.error(error);
@@ -511,14 +467,14 @@ const saveEbookBook = async () => {
     let pdfUrl = bookUploadForm.pdfUrl || '';
 
     // Cover Image
-    if (bookUploadForm.coverFile) {
-      coverUrl = await uploadToFirebase(bookUploadForm.coverFile, "ebooks/covers");
-    }
+if (bookUploadForm.coverFile) {
+  coverUrl = await uploadToCloudinary(bookUploadForm.coverFile);
+}
 
-    // PDF
-    if (bookUploadForm.pdfFile) {
-      pdfUrl = await uploadToFirebase(bookUploadForm.pdfFile, "ebooks/pdfs");
-    }
+// PDF
+if (bookUploadForm.pdfFile) {
+  pdfUrl = await uploadToCloudinary(bookUploadForm.pdfFile);
+}
 
     if (!pdfUrl) {
       alert('PDF file ya PDF link required hai');
@@ -554,7 +510,7 @@ const saveEbookBook = async () => {
       description: '', featured: false, coverFile: null, coverUrl: '', pdfFile: null, pdfUrl: ''
     });
 
-    alert('✅ Book successfully uploaded to Firebase Storage!');
+    alert('✅ Book successfully uploaded to Cloudinary!');
   } catch (err) {
     console.error(err);
     alert('Upload failed: ' + err.message);
@@ -1812,7 +1768,7 @@ const renderLibraryModule = () => {
               const file = e.target.files[0];
               if (!file) return;
               try {
-                const url = await uploadToFirebase(file, "images/quotes");
+                const url = await uploadToCloudinary(file);
                 setAppConfig((prev) => ({ ...prev, quoteImage: url }));
                 alert("✅ Quote image uploaded!");
               } catch (err) {
@@ -1879,7 +1835,7 @@ const renderLibraryModule = () => {
           const f = e.target.files[0];
           if (!f) return;
           try {
-            const url = await uploadToFirebase(f, "images/logos");
+            const url = await uploadToCloudinary(f);
             setAppConfig(prev => ({ ...prev, logoUrl: url }));
             alert("✅ Logo uploaded successfully!");
           } catch (err) {
@@ -2008,7 +1964,7 @@ const renderLibraryModule = () => {
               const file = e.target.files[0];
               if (!file) return;
               try {
-                const url = await uploadToFirebase(file, "images/onboarding");
+                const url = await uploadToCloudinary(file);
                 const updated = [...onboardingContent];
                 updated[idx].image = url;
                 setOnboardingContent(updated);
@@ -2351,7 +2307,7 @@ const renderLibraryModule = () => {
               if (!file) return;
               try {
                 setReformerForm(prev => ({...prev, uploading: true}));
-                const url = await uploadToFirebase(file, "images/reformers");
+                const url = await uploadToCloudinary(file);
                 setReformerForm(prev => ({...prev, image: url, uploading: false}));
               } catch (err) {
                 alert("Upload failed");
@@ -2592,7 +2548,7 @@ const renderLibraryModule = () => {
     {/* ===== UPLOAD BOOK (FIREBASE STORAGE) ===== */}
     {ebookSubTab === 'upload' && (
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
-        <h3 className="text-xs font-bold text-amber-400 uppercase">Upload eBook (Firebase Storage)</h3>
+        <h3 className="text-xs font-bold text-amber-400 uppercase">Upload eBook (Cloudinary)</h3>
 
         <select
           value={bookUploadForm.mahapurushId}
