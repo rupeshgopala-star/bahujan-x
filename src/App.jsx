@@ -329,6 +329,10 @@ useEffect(() => {
         if (data.videosList) setVideosList(data.videosList);
         if (data.booksList) setBooksList(data.booksList);
         if (data.communityPosts) setCommunityPosts(data.communityPosts);
+
+if (data.ebookMahapurush) setEbookMahapurush(data.ebookMahapurush);
+if (data.ebookLanguages) setEbookLanguages(data.ebookLanguages);
+if (data.ebookBooks) setEbookBooks(data.ebookBooks);
         console.log("✅ Data loaded from Firestore");
       }
     } catch (err) {
