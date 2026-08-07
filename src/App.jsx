@@ -1054,80 +1054,340 @@ const startEditReformer = (leader) => {
     );
   };
 
-  // ==================== LIBRARY ====================
-  const renderLibraryModule = () => {
-    if (pdfReaderOpen && selectedBook) {
-      return (
-        <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col max-w-md mx-auto">
-          <div className="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
-            <button onClick={() => setPdfReaderOpen(false)} className="text-slate-400 hover:text-white flex items-center text-xs">
-              <ArrowLeft className="w-4 h-4 mr-1" /> Close PDF
-            </button>
-            <span className="text-xs font-bold text-white truncate max-w-[180px]">{selectedBook.title}</span>
-            <button onClick={() => downloadToDevice(selectedBook)} className="text-slate-400 hover:text-white"><Download className="w-4 h-4" /></button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center bg-slate-900/50">
-            <div className="w-full bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-2xl text-center space-y-3">
-              <FileText className="w-12 h-12 text-amber-400 mx-auto animate-bounce" />
-              <h3 className="text-sm font-bold text-white">{selectedBook.title}</h3>
-              <p className="text-[10px] text-slate-400">Page 1 of {selectedBook.pages}</p>
-              <div className="text-left bg-slate-950 p-3 rounded-lg text-xs text-slate-300 leading-relaxed font-serif border border-slate-800">
-                <p className="mb-2 font-bold text-amber-400">CHAPTER 1: Context & Vision</p>
-                <p>Social equality and educational enlightenment are fundamental to true human liberation. Without knowledge, minds remain bound...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
+  // ==================== LIBRARY (Full eBook Roadmap) ====================
+const renderLibraryModule = () => {
 
-    if (selectedBook) {
-      return (
-        <div className="space-y-4 pb-20">
-          <button onClick={() => setSelectedBook(null)} className="flex items-center text-xs text-slate-400 hover:text-white">
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Library
-          </button>
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
-            <div className={`w-28 h-36 ${selectedBook.cover} rounded-xl mx-auto mb-3 flex items-center justify-center p-3 text-white font-bold text-xs shadow-xl`}>
-              {selectedBook.title}
-            </div>
-            <h2 className="text-base font-bold text-white">{selectedBook.title}</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Author: {selectedBook.author}</p>
-            <div className="flex justify-center space-x-6 my-3 text-xs text-slate-300 border-y border-slate-800 py-2.5">
-              <div><p className="text-slate-500 text-[9px]">PAGES</p><p className="font-bold text-white">{selectedBook.pages}</p></div>
-              <div><p className="text-slate-500 text-[9px]">SIZE</p><p className="font-bold text-white">{selectedBook.size}</p></div>
-              <div><p className="text-slate-500 text-[9px]">RATING</p><p className="font-bold text-amber-400">★ {selectedBook.rating}</p></div>
-            </div>
-            <div className="flex space-x-2">
-              <button onClick={() => setPdfReaderOpen(true)} className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-amber-500/20">
-                <BookOpen className="w-4 h-4" /><span>Read Online</span>
-              </button>
-              <button onClick={() => downloadToDevice(selectedBook)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 border border-slate-700">
-                <Download className="w-4 h-4" /><span>Download</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
+  // ---------- 1. MAHAPURUSH LIST ----------
+  if (ebookView === 'mahapurush') {
     return (
-      <div className="space-y-3 pb-20">
-        <h2 className="text-base font-bold text-white">Books & PDF Library</h2>
-        <div className="grid grid-cols-2 gap-2.5">
-          {booksList.map((book) => (
-            <div key={book.id} onClick={() => setSelectedBook(book)} className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 cursor-pointer hover:border-slate-700">
-              <div className={`h-24 ${book.cover} rounded-lg mb-2 flex items-center justify-center p-2 text-center text-white text-[10px] font-bold shadow`}>
-                {book.title}
+      <div className="space-y-4 pb-20">
+        <h2 className="text-base font-bold text-white">Bahujan Mahapurush eBooks</h2>
+        <p className="text-xs text-slate-400 -mt-2">Select a leader to explore books</p>
+
+        <div className="grid grid-cols-2 gap-3">
+          {ebookMahapurush
+            .filter(mp => mp.status === 'active')
+            .sort((a, b) => (a.order || 0) - (b.order || 0))
+            .map((mp) => (
+              <div
+                key={mp.id}
+                onClick={() => {
+                  setSelectedEbookMahapurush(mp);
+                  setEbookView('languages');
+                }}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center cursor-pointer hover:border-amber-500/40 active:scale-95 transition-all"
+              >
+                <img
+                  src={mp.photo || 'https://via.placeholder.com/80'}
+                  alt={mp.name}
+                  className="w-16 h-16 rounded-full object-cover mx-auto mb-2 border-2 border-blue-500/40"
+                />
+                <h3 className="text-xs font-bold text-white leading-tight">{mp.name}</h3>
               </div>
-              <h4 className="text-xs font-bold text-white truncate">{book.title}</h4>
-              <p className="text-[10px] text-slate-400 truncate">{book.author}</p>
-            </div>
-          ))}
+            ))}
+        </div>
+
+        {ebookMahapurush.length === 0 && (
+          <div className="text-center py-16 text-slate-500 text-sm">
+            Abhi koi Mahapurush add nahi hua.<br />Admin panel se add karein.
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ---------- 2. LANGUAGE SELECTION ----------
+  if (ebookView === 'languages' && selectedEbookMahapurush) {
+    return (
+      <div className="space-y-4 pb-20">
+        <button
+          onClick={() => {
+            setEbookView('mahapurush');
+            setSelectedEbookMahapurush(null);
+          }}
+          className="flex items-center text-xs text-slate-400 hover:text-white"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Mahapurush
+        </button>
+
+        <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <img
+            src={selectedEbookMahapurush.photo || 'https://via.placeholder.com/60'}
+            className="w-14 h-14 rounded-full object-cover border border-amber-400/40"
+          />
+          <div>
+            <h2 className="text-sm font-bold text-white">{selectedEbookMahapurush.name}</h2>
+            <p className="text-xs text-slate-400">Select a language</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {ebookLanguages
+            .filter(lang => lang.enabled)
+            .map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => {
+                  setSelectedEbookLanguage(lang);
+                  setEbookView('books');
+                }}
+                className="bg-slate-900 border border-slate-800 hover:border-blue-500/50 rounded-2xl py-4 font-medium text-sm text-white transition-all"
+              >
+                {lang.name}
+              </button>
+            ))}
         </div>
       </div>
     );
-  };
+  }
+
+  // ---------- 3. BOOKS LIST ----------
+  if (ebookView === 'books' && selectedEbookMahapurush && selectedEbookLanguage) {
+    const filteredBooks = ebookBooks.filter(
+      (b) =>
+        b.mahapurushId === selectedEbookMahapurush.id &&
+        b.languageId === selectedEbookLanguage.id
+    );
+
+    return (
+      <div className="space-y-4 pb-20">
+        <button
+          onClick={() => {
+            setEbookView('languages');
+            setSelectedEbookLanguage(null);
+          }}
+          className="flex items-center text-xs text-slate-400 hover:text-white"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Languages
+        </button>
+
+        <div>
+          <h2 className="text-sm font-bold text-white">
+            {selectedEbookMahapurush.name} — {selectedEbookLanguage.name} eBooks
+          </h2>
+          <p className="text-xs text-slate-400">{filteredBooks.length} books available</p>
+        </div>
+
+        <div className="space-y-3">
+          {filteredBooks.map((book) => (
+            <div
+              key={book.id}
+              onClick={() => {
+                setSelectedEbookBook(book);
+                setPdfPage(1);
+                setEbookView('reader');
+              }}
+              className="flex gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-3 cursor-pointer hover:border-slate-700 active:scale-[0.98] transition-all"
+            >
+              <div className="w-16 h-24 rounded-xl overflow-hidden bg-slate-800 flex-shrink-0">
+                {book.coverUrl ? (
+                  <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] text-center p-1 text-slate-400">
+                    No Cover
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold text-white line-clamp-2">{book.title}</h3>
+                <p className="text-xs text-slate-400 mt-1">{book.author || 'Unknown Author'}</p>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  {book.category && `${book.category} • `}PDF
+                </p>
+                {book.featured && (
+                  <span className="inline-block mt-1.5 text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                    Featured
+                  </span>
+                )}
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-600 self-center" />
+            </div>
+          ))}
+        </div>
+
+        {filteredBooks.length === 0 && (
+          <div className="text-center py-16 text-slate-500 text-sm">
+            Is language mein abhi koi book nahi hai.<br />Admin panel se upload karein.
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ---------- 4. ADVANCED PDF READER ----------
+  if (ebookView === 'reader' && selectedEbookBook) {
+    return (
+      <div className={`fixed inset-0 z-50 flex flex-col max-w-md mx-auto ${pdfDarkMode ? 'bg-black' : 'bg-slate-950'}`}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 border-b border-slate-800 bg-slate-900/95">
+          <button
+            onClick={() => {
+              setEbookView('books');
+              setSelectedEbookBook(null);
+            }}
+            className="text-slate-400 hover:text-white"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="flex-1 mx-3 min-w-0">
+            <h1 className="text-xs font-bold text-white truncate">{selectedEbookBook.title}</h1>
+            <p className="text-[10px] text-slate-400">
+              {selectedEbookLanguage?.name} • Page {pdfPage}
+            </p>
+          </div>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setPdfScale(s => Math.max(0.6, s - 0.15))}
+              className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-sm"
+            >
+              −
+            </button>
+            <button
+              onClick={() => setPdfScale(s => Math.min(2.2, s + 0.15))}
+              className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-sm"
+            >
+              +
+            </button>
+            <button
+              onClick={() => setPdfDarkMode(!pdfDarkMode)}
+              className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-xs"
+            >
+              {pdfDarkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
+        </div>
+
+        {/* PDF Area */}
+        <div className="flex-1 overflow-auto flex justify-center items-start p-2 bg-slate-900/30">
+          {selectedEbookBook.pdfUrl ? (
+            <iframe
+              src={`\( {selectedEbookBook.pdfUrl}#page= \){pdfPage}`}
+              title={selectedEbookBook.title}
+              className="w-full h-full rounded-xl border border-slate-800"
+              style={{ minHeight: '70vh' }}
+            />
+          ) : (
+            <div className="text-center mt-20 text-slate-400">
+              <FileText className="w-12 h-12 mx-auto mb-3 text-amber-400" />
+              <p>PDF link available nahi hai</p>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Controls */}
+        <div className="p-3 border-t border-slate-800 bg-slate-900">
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => setPdfPage(p => Math.max(1, p - 1))}
+              className="px-4 py-2 bg-blue-600 rounded-xl text-xs font-bold disabled:opacity-40"
+            >
+              ‹ Prev
+            </button>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                value={pdfPage}
+                onChange={(e) => setPdfPage(Number(e.target.value) || 1)}
+                className="w-14 bg-slate-950 border border-slate-700 rounded-lg text-center py-1 text-xs"
+              />
+            </div>
+
+            <button
+              onClick={() => setPdfPage(p => p + 1)}
+              className="px-4 py-2 bg-blue-600 rounded-xl text-xs font-bold"
+            >
+              Next ›
+            </button>
+          </div>
+
+          <div className="flex justify-center gap-6 text-xs">
+            <button
+              onClick={() => {
+                if (pdfBookmarks.includes(pdfPage)) {
+                  setPdfBookmarks(pdfBookmarks.filter(p => p !== pdfPage));
+                } else {
+                  setPdfBookmarks([...pdfBookmarks, pdfPage]);
+                }
+              }}
+              className="text-amber-400"
+            >
+              {pdfBookmarks.includes(pdfPage) ? '★ Bookmarked' : '☆ Bookmark'}
+            </button>
+            <button onClick={() => setShowPdfSearch(true)} className="text-slate-300">
+              🔍 Search
+            </button>
+            <button onClick={() => setShowPdfChapters(true)} className="text-slate-300">
+              📑 Chapters
+            </button>
+          </div>
+        </div>
+
+        {/* Chapters Panel */}
+        {showPdfChapters && (
+          <div className="fixed inset-0 z-50 flex">
+            <div className="absolute inset-0 bg-black/60" onClick={() => setShowPdfChapters(false)} />
+            <div className="relative ml-auto w-72 max-w-full bg-slate-900 h-full overflow-y-auto p-4 border-l border-slate-800">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-sm">Chapters</h3>
+                <button onClick={() => setShowPdfChapters(false)} className="text-2xl text-slate-400">×</button>
+              </div>
+              <p className="text-xs text-slate-500 mb-3">
+                PDF ke chapters yahan dikhenge (agar PDF mein outline ho).
+              </p>
+              <div className="space-y-2">
+                {[1, 5, 12, 25, 40].map((pg) => (
+                  <button
+                    key={pg}
+                    onClick={() => {
+                      setPdfPage(pg);
+                      setShowPdfChapters(false);
+                    }}
+                    className="w-full text-left px-3 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-xs"
+                  >
+                    Page {pg}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Search Panel */}
+        {showPdfSearch && (
+          <div className="fixed inset-0 z-50 flex items-end">
+            <div className="absolute inset-0 bg-black/70" onClick={() => setShowPdfSearch(false)} />
+            <div className="relative w-full bg-slate-900 rounded-t-3xl p-5 max-h-[70vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-sm">Search inside PDF</h3>
+                <button onClick={() => setShowPdfSearch(false)} className="text-2xl text-slate-400">×</button>
+              </div>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={pdfSearchQuery}
+                  onChange={(e) => setPdfSearchQuery(e.target.value)}
+                  placeholder="Type to search..."
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs"
+                />
+                <button className="bg-blue-600 px-5 rounded-xl text-xs font-bold">
+                  Go
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 text-center py-6">
+                Search results yahan dikhenge
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Fallback
+  return null;
+};
 
   // ==================== COMMUNITY ====================
   const renderCommunityModule = () => (
