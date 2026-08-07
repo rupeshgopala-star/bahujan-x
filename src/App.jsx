@@ -290,6 +290,19 @@ const [bookUploadForm, setBookUploadForm] = useState({
 const [bookUploading, setBookUploading] = useState(false);
 const [uploadProgress, setUploadProgress] = useState(0);
 
+// ==================== USER eBOOK FLOW STATES ====================
+const [ebookView, setEbookView] = useState('mahapurush'); // mahapurush | languages | books | reader
+const [selectedEbookMahapurush, setSelectedEbookMahapurush] = useState(null);
+const [selectedEbookLanguage, setSelectedEbookLanguage] = useState(null);
+const [selectedEbookBook, setSelectedEbookBook] = useState(null);
+const [pdfPage, setPdfPage] = useState(1);
+const [pdfScale, setPdfScale] = useState(1.0);
+const [pdfDarkMode, setPdfDarkMode] = useState(false);
+const [pdfBookmarks, setPdfBookmarks] = useState([]);
+const [showPdfChapters, setShowPdfChapters] = useState(false);
+const [showPdfSearch, setShowPdfSearch] = useState(false);
+const [pdfSearchQuery, setPdfSearchQuery] = useState('');
+
   // Splash timer
   useEffect(() => {
     if (currentScreen === 'splash') {
