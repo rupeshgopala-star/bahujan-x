@@ -2589,7 +2589,7 @@ const renderLibraryModule = () => {
       </div>
     )}
 
-    {/* ===== UPLOAD BOOK (Firebase Storage) ===== */}
+    {/* ===== UPLOAD BOOK (FIREBASE STORAGE) ===== */}
     {ebookSubTab === 'upload' && (
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
         <h3 className="text-xs font-bold text-amber-400 uppercase">Upload eBook (Firebase Storage)</h3>
