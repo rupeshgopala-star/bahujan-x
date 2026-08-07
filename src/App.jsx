@@ -5,7 +5,8 @@ import {
   getDoc, 
   setDoc 
 } from 'firebase/firestore';
-import { uploadToCloudinary } from './utils/cloudinary';
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "./firebase";
 import { 
   Home, BookOpen, Video, FileText, User, Search, Bell, Bookmark, Download, 
   Settings, LogOut, ChevronRight, Play, Heart, Share2, MessageSquare, Plus, 
