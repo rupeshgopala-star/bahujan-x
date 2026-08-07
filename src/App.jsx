@@ -507,40 +507,59 @@ const saveEbookBook = async () => {
   setUploadProgress(0);
 
   try {
-    let coverUrl = bookUploadForm.coverUrl;
-    let pdfUrl = bookUploadForm.pdfUrl;
+    let coverUrl = bookUploadForm.coverUrl || '';
+    let pdfUrl = bookUploadForm.pdfUrl || '';
 
+    // Cover Image
     if (bookUploadForm.coverFile) {
-      coverUrl = await uploadToCloudinary(bookUploadForm.coverFile); // aapka existing function
+      coverUrl = await uploadToFirebase(bookUploadForm.coverFile, "ebooks/covers");
     }
+
+    // PDF
     if (bookUploadForm.pdfFile) {
-      // Progress ke liye aap axios use kar sakte ho, abhi simple
-      pdfUrl = await uploadToCloudinary(bookUploadForm.pdfFile);
+      pdfUrl = await uploadToFirebase(bookUploadForm.pdfFile, "ebooks/pdfs");
     }
 
     if (!pdfUrl) {
-      alert('PDF required');
+      alert('PDF file ya PDF link required hai');
       setBookUploading(false);
       return;
     }
 
     const newBook = {
       id: Date.now().toString(),
-      ...bookUploadForm,
+      mahapurushId: bookUploadForm.mahapurushId,
+      languageId: bookUploadForm.languageId,
+      title: bookUploadForm.title,
+      author: bookUploadForm.author,
+      category: bookUploadForm.category,
+      description: bookUploadForm.description,
+      featured: bookUploadForm.featured,
       coverUrl,
       pdfUrl,
       createdAt: new Date().toISOString()
     };
 
-    setEbookBooks([...ebookBooks, newBook]);
+    const updatedBooks = [...ebookBooks, newBook];
+    setEbookBooks(updatedBooks);
+
+    // Firestore me save
+    await setDoc(doc(db, "settings", "appConfig"), {
+      ebookBooks: updatedBooks
+    }, { merge: true });
+
+    // Form reset
     setBookUploadForm({
       mahapurushId: '', languageId: '', title: '', author: '', category: '',
       description: '', featured: false, coverFile: null, coverUrl: '', pdfFile: null, pdfUrl: ''
     });
-    alert('✅ Book uploaded successfully!');
+
+    alert('✅ Book successfully uploaded to Firebase Storage!');
   } catch (err) {
+    console.error(err);
     alert('Upload failed: ' + err.message);
   }
+
   setBookUploading(false);
   setUploadProgress(0);
 };
