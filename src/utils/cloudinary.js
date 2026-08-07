@@ -23,4 +23,4 @@ export const uploadToCloudinary = async (file) => {
 
   const data = await response.json();
   return data.secure_url;
-};
+}; 
