@@ -267,6 +267,28 @@ const [reformerForm, setReformerForm] = useState({
   image: '',
   uploading: false
 });
+// ==================== eBOOK STATES ====================
+const [ebookSubTab, setEbookSubTab] = useState('mahapurush');
+const [ebookMahapurush, setEbookMahapurush] = useState([]);
+const [ebookLanguages, setEbookLanguages] = useState([
+  { id: 'hi', name: 'Hindi', code: 'hi', enabled: true },
+  { id: 'en', name: 'English', code: 'en', enabled: true },
+  { id: 'kn', name: 'Kannada', code: 'kn', enabled: true },
+  { id: 'mr', name: 'Marathi', code: 'mr', enabled: true },
+  { id: 'ta', name: 'Tamil', code: 'ta', enabled: true },
+  { id: 'te', name: 'Telugu', code: 'te', enabled: true },
+  { id: 'pa', name: 'Punjabi', code: 'pa', enabled: true },
+  { id: 'bn', name: 'Bengali', code: 'bn', enabled: true },
+]);
+const [ebookBooks, setEbookBooks] = useState([]);
+const [ebookForm, setEbookForm] = useState({ name: '', photo: '', bio: '', order: 1, status: 'active' });
+const [langForm, setLangForm] = useState({ name: '', code: '' });
+const [bookUploadForm, setBookUploadForm] = useState({
+  mahapurushId: '', languageId: '', title: '', author: '', category: '',
+  description: '', featured: false, coverFile: null, coverUrl: '', pdfFile: null, pdfUrl: ''
+});
+const [bookUploading, setBookUploading] = useState(false);
+const [uploadProgress, setUploadProgress] = useState(0);
 
   // Splash timer
   useEffect(() => {
@@ -387,6 +409,84 @@ const saveAllSettings = async () => {
     alert("❌ Save failed: " + err.message);
   }
 };
+
+const saveEbookMahapurush = async () => {
+  if (!ebookForm.name.trim()) return alert('Name required');
+  
+  let updated;
+  if (ebookForm.id) {
+    updated = ebookMahapurush.map(m => m.id === ebookForm.id ? { ...ebookForm } : m);
+  } else {
+    updated = [...ebookMahapurush, { ...ebookForm, id: Date.now().toString() }];
+  }
+  setEbookMahapurush(updated);
+  setEbookForm({ name: '', photo: '', bio: '', order: 1, status: 'active' });
+  
+  // Firestore me save (optional)
+  await setDoc(doc(db, "settings", "appConfig"), { ebookMahapurush: updated }, { merge: true });
+  alert('Saved!');
+};
+
+const saveLanguage = () => {
+  if (!langForm.name.trim()) return;
+  const newLang = { id: Date.now().toString(), ...langForm, enabled: true };
+  setEbookLanguages([...ebookLanguages, newLang]);
+  setLangForm({ name: '', code: '' });
+};
+
+const toggleLanguage = (id) => {
+  setEbookLanguages(ebookLanguages.map(l => 
+    l.id === id ? { ...l, enabled: !l.enabled } : l
+  ));
+};
+
+const saveEbookBook = async () => {
+  if (!bookUploadForm.mahapurushId || !bookUploadForm.languageId || !bookUploadForm.title) {
+    return alert('Mahapurush, Language aur Title required hain');
+  }
+
+  setBookUploading(true);
+  setUploadProgress(0);
+
+  try {
+    let coverUrl = bookUploadForm.coverUrl;
+    let pdfUrl = bookUploadForm.pdfUrl;
+
+    if (bookUploadForm.coverFile) {
+      coverUrl = await uploadToCloudinary(bookUploadForm.coverFile); // aapka existing function
+    }
+    if (bookUploadForm.pdfFile) {
+      // Progress ke liye aap axios use kar sakte ho, abhi simple
+      pdfUrl = await uploadToCloudinary(bookUploadForm.pdfFile);
+    }
+
+    if (!pdfUrl) {
+      alert('PDF required');
+      setBookUploading(false);
+      return;
+    }
+
+    const newBook = {
+      id: Date.now().toString(),
+      ...bookUploadForm,
+      coverUrl,
+      pdfUrl,
+      createdAt: new Date().toISOString()
+    };
+
+    setEbookBooks([...ebookBooks, newBook]);
+    setBookUploadForm({
+      mahapurushId: '', languageId: '', title: '', author: '', category: '',
+      description: '', featured: false, coverFile: null, coverUrl: '', pdfFile: null, pdfUrl: ''
+    });
+    alert('✅ Book uploaded successfully!');
+  } catch (err) {
+    alert('Upload failed: ' + err.message);
+  }
+  setBookUploading(false);
+  setUploadProgress(0);
+};
+
 const resetReformerForm = () => {
   setReformerForm({
     name: '',
@@ -1266,7 +1366,7 @@ const startEditReformer = (leader) => {
           { id: 'upload', label: 'Upload Center', icon: Upload },
           { id: 'content', label: 'Leaders & Books', icon: BookOpen },
           { id: 'security', label: 'Security PIN', icon: Key },
-          { id: 'integrations', label: 'Integrations', icon: Database },
+          { id: 'ebooks', label: 'eBooks', icon: BookOpen },
           { id: 'themes', label: 'Themes & Fonts', icon: Palette },
           { id: 'donate_settings', label: 'Donate / UPI', icon: HeartHandshake }
         ].map((t) => {
@@ -2003,34 +2103,301 @@ const startEditReformer = (leader) => {
         </div>
       )}
 
-      {/* Integrations */}
-      {adminTab === 'integrations' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
-          <h2 className="text-xs font-bold text-amber-400 uppercase">Connect Services</h2>
-          <p className="text-xs text-slate-400">Click karke official console open hoga.</p>
-          {[
-            { key: 'firebase', name: 'Firebase', desc: 'Auth + Hosting' },
-            { key: 'firestore', name: 'Firestore Database', desc: 'Realtime DB' },
-            { key: 'github', name: 'GitHub', desc: 'Code repo & deploy' },
-            { key: 'cloudinary', name: 'Cloudinary', desc: 'Image/Video storage' },
-            { key: 'netlify', name: 'Netlify', desc: 'Frontend hosting' }
-          ].map(s => (
-            <div key={s.key} className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
-              <div>
-                <p className="text-xs font-bold text-white">{s.name}</p>
-                <p className="text-[10px] text-slate-400">{s.desc}</p>
-                <p className={`text-[10px] ${integrations[s.key].connected ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  {integrations[s.key].connected ? '● Connected' : '○ Not connected'}
-                </p>
+      {/* ==================== eBOOKS MANAGEMENT ==================== */}
+{adminTab === 'ebooks' && (
+  <div className="space-y-5">
+    
+    {/* Sub Tabs */}
+    <div className="flex flex-wrap gap-2">
+      {['mahapurush', 'languages', 'upload', 'analytics'].map((sub) => (
+        <button
+          key={sub}
+          onClick={() => setEbookSubTab(sub)}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            ebookSubTab === sub 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-slate-900 text-slate-400 border border-slate-800'
+          }`}
+        >
+          {sub === 'mahapurush' && 'Mahapurush'}
+          {sub === 'languages' && 'Languages'}
+          {sub === 'upload' && 'Upload Book'}
+          {sub === 'analytics' && 'Analytics'}
+        </button>
+      ))}
+    </div>
+
+    {/* ===== MAHAPURUSH MANAGEMENT ===== */}
+    {ebookSubTab === 'mahapurush' && (
+      <div className="space-y-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <h3 className="text-xs font-bold text-amber-400 uppercase">Add / Edit Mahapurush</h3>
+          
+          <input
+            type="text"
+            placeholder="Name (Dr. B. R. Ambedkar)"
+            value={ebookForm.name}
+            onChange={(e) => setEbookForm({...ebookForm, name: e.target.value})}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+          />
+          <input
+            type="text"
+            placeholder="Photo URL"
+            value={ebookForm.photo}
+            onChange={(e) => setEbookForm({...ebookForm, photo: e.target.value})}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+          />
+          <textarea
+            placeholder="Short Bio"
+            value={ebookForm.bio}
+            onChange={(e) => setEbookForm({...ebookForm, bio: e.target.value})}
+            rows={2}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white resize-none"
+          />
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="Order"
+              value={ebookForm.order}
+              onChange={(e) => setEbookForm({...ebookForm, order: e.target.value})}
+              className="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+            />
+            <select
+              value={ebookForm.status}
+              onChange={(e) => setEbookForm({...ebookForm, status: e.target.value})}
+              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+            >
+              <option value="active">Active</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </div>
+
+          <button
+            onClick={saveEbookMahapurush}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs"
+          >
+            {ebookForm.id ? 'Update Mahapurush' : 'Add Mahapurush'}
+          </button>
+        </div>
+
+        {/* List */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 max-h-80 overflow-y-auto">
+          <h3 className="text-xs font-bold text-white mb-2">All Mahapurush ({ebookMahapurush.length})</h3>
+          {ebookMahapurush.map((mp) => (
+            <div key={mp.id} className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <div className="flex items-center gap-3">
+                <img src={mp.photo || 'https://via.placeholder.com/40'} className="w-10 h-10 rounded-full object-cover" />
+                <div>
+                  <p className="text-xs font-bold text-white">{mp.name}</p>
+                  <p className="text-[10px] text-slate-400">Order: {mp.order} • {mp.status}</p>
+                </div>
               </div>
-              <button onClick={() => connectIntegration(s.key)}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1">
-                <ExternalLink className="w-3 h-3" /> <span>Connect</span>
+              <button
+                onClick={() => setEbookForm({...mp})}
+                className="text-blue-400 text-xs font-bold"
+              >
+                Edit
               </button>
             </div>
           ))}
         </div>
-      )}
+      </div>
+    )}
+
+    {/* ===== LANGUAGE MANAGEMENT ===== */}
+    {ebookSubTab === 'languages' && (
+      <div className="space-y-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <h3 className="text-xs font-bold text-amber-400 uppercase">Add Language</h3>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Language Name (Hindi)"
+              value={langForm.name}
+              onChange={(e) => setLangForm({...langForm, name: e.target.value})}
+              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+            />
+            <input
+              type="text"
+              placeholder="Code (hi)"
+              value={langForm.code}
+              onChange={(e) => setLangForm({...langForm, code: e.target.value})}
+              className="w-20 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+            />
+          </div>
+          <button
+            onClick={saveLanguage}
+            className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs"
+          >
+            Add Language
+          </button>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
+          <h3 className="text-xs font-bold text-white mb-2">Global Languages</h3>
+          {ebookLanguages.map((lang) => (
+            <div key={lang.id} className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span className="text-xs font-medium text-white">{lang.name} ({lang.code})</span>
+              <button
+                onClick={() => toggleLanguage(lang.id)}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold ${
+                  lang.enabled ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-300'
+                }`}
+              >
+                {lang.enabled ? 'Enabled' : 'Disabled'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* ===== UPLOAD BOOK (Cloudinary) ===== */}
+    {ebookSubTab === 'upload' && (
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+        <h3 className="text-xs font-bold text-amber-400 uppercase">Upload eBook (Cloudinary)</h3>
+
+        <select
+          value={bookUploadForm.mahapurushId}
+          onChange={(e) => setBookUploadForm({...bookUploadForm, mahapurushId: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+        >
+          <option value="">Select Mahapurush</option>
+          {ebookMahapurush.map(mp => (
+            <option key={mp.id} value={mp.id}>{mp.name}</option>
+          ))}
+        </select>
+
+        <select
+          value={bookUploadForm.languageId}
+          onChange={(e) => setBookUploadForm({...bookUploadForm, languageId: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+        >
+          <option value="">Select Language</option>
+          {ebookLanguages.filter(l => l.enabled).map(lang => (
+            <option key={lang.id} value={lang.id}>{lang.name}</option>
+          ))}
+        </select>
+
+        <input
+          type="text"
+          placeholder="Book Title"
+          value={bookUploadForm.title}
+          onChange={(e) => setBookUploadForm({...bookUploadForm, title: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+        />
+
+        <input
+          type="text"
+          placeholder="Author"
+          value={bookUploadForm.author}
+          onChange={(e) => setBookUploadForm({...bookUploadForm, author: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+        />
+
+        <input
+          type="text"
+          placeholder="Category (Social Justice)"
+          value={bookUploadForm.category}
+          onChange={(e) => setBookUploadForm({...bookUploadForm, category: e.target.value})}
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+        />
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={bookUploadForm.featured}
+            onChange={(e) => setBookUploadForm({...bookUploadForm, featured: e.target.checked})}
+          />
+          <span className="text-xs text-slate-300">Featured Book</span>
+        </div>
+
+        <textarea
+          placeholder="Short Description"
+          value={bookUploadForm.description}
+          onChange={(e) => setBookUploadForm({...bookUploadForm, description: e.target.value})}
+          rows={2}
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white resize-none"
+        />
+
+        {/* Cover Image */}
+        <div>
+          <p className="text-[10px] text-slate-400 mb-1">Cover Image</p>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setBookUploadForm({...bookUploadForm, coverFile: e.target.files[0]})}
+            className="text-xs text-slate-400 mb-1"
+          />
+          <input
+            type="text"
+            placeholder="Or paste Cover URL"
+            value={bookUploadForm.coverUrl}
+            onChange={(e) => setBookUploadForm({...bookUploadForm, coverUrl: e.target.value})}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+          />
+        </div>
+
+        {/* PDF */}
+        <div>
+          <p className="text-[10px] text-slate-400 mb-1">PDF File (Local) ya Link</p>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setBookUploadForm({...bookUploadForm, pdfFile: e.target.files[0]})}
+            className="text-xs text-slate-400 mb-1"
+          />
+          <input
+            type="text"
+            placeholder="Or paste PDF Direct Link"
+            value={bookUploadForm.pdfUrl}
+            onChange={(e) => setBookUploadForm({...bookUploadForm, pdfUrl: e.target.value})}
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+          />
+        </div>
+
+        {/* Progress */}
+        {bookUploading && (
+          <div>
+            <p className="text-xs text-amber-400 mb-1">Uploading... {uploadProgress}%</p>
+            <div className="w-full bg-slate-800 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all" 
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={saveEbookBook}
+          disabled={bookUploading}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl text-xs"
+        >
+          {bookUploading ? `Uploading ${uploadProgress}%...` : 'Upload & Publish eBook'}
+        </button>
+      </div>
+    )}
+
+    {/* ===== ANALYTICS ===== */}
+    {ebookSubTab === 'analytics' && (
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
+          <p className="text-2xl font-bold text-amber-400">{ebookBooks.length}</p>
+          <p className="text-[10px] text-slate-400 mt-1">Total Books</p>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
+          <p className="text-2xl font-bold text-amber-400">{ebookLanguages.length}</p>
+          <p className="text-[10px] text-slate-400 mt-1">Languages</p>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
+          <p className="text-2xl font-bold text-amber-400">{ebookMahapurush.length}</p>
+          <p className="text-[10px] text-slate-400 mt-1">Mahapurush</p>
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
       {/* Themes */}
       {adminTab === 'themes' && (
