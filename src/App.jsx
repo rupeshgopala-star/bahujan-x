@@ -355,35 +355,75 @@ if (data.ebookBooks) setEbookBooks(data.ebookBooks);
   }, 600);
 };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-  
-    try {
-      setUploadForm(prev => ({
-        ...prev,
-        file: file,
-        fileName: file.name,
-        uploading: true,
-        imageUrl: ''
-      }));
-  
-      const url = await uploadToCloudinary(file);
-  
-      setUploadForm(prev => ({
-        ...prev,
-        imageUrl: url,
-        uploading: false
-      }));
-  
-      alert("✅ Uploaded successfully!\n\n" + url);
-  
-    } catch (error) {
-      console.error(error);
-      alert("❌ Upload failed: " + error.message);
-      setUploadForm(prev => ({ ...prev, uploading: false }));
+// ==================== FIREBASE STORAGE UPLOAD (Sab jagah use hoga) ====================
+const uploadToFirebase = (file, folder = "uploads") => {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error("No file selected"));
+      return;
     }
-  };
+
+    const fileName = `\( {Date.now()}_ \){file.name.replace(/\s+/g, '_')}`;
+    const storageRef = ref(storage, `\( {folder}/ \){fileName}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        setUploadProgress(progress);
+      },
+      (error) => {
+        console.error("Upload error:", error);
+        reject(error);
+      },
+      async () => {
+        try {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(downloadURL);
+        } catch (err) {
+          reject(err);
+        }
+      }
+    );
+  });
+};
+
+  const handleFileUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    setUploadForm(prev => ({
+      ...prev,
+      file: file,
+      fileName: file.name,
+      uploading: true,
+      imageUrl: ''
+    }));
+
+    // Folder decide karo type ke hisaab se
+    let folder = "uploads";
+    if (uploadForm.type === "video") folder = "videos";
+    else if (uploadForm.type === "pdf" || uploadForm.type === "book") folder = "pdfs";
+    else if (uploadForm.type === "image") folder = "images";
+
+    const url = await uploadToFirebase(file, folder);
+
+    setUploadForm(prev => ({
+      ...prev,
+      imageUrl: url,
+      uploading: false
+    }));
+
+    alert("✅ Uploaded successfully to Firebase!\n\n" + url);
+
+  } catch (error) {
+    console.error(error);
+    alert("❌ Upload failed: " + error.message);
+    setUploadForm(prev => ({ ...prev, uploading: false }));
+  }
+};
 
   const connectIntegration = (service) => {
     const urls = {
