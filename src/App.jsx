@@ -1812,7 +1812,7 @@ const renderLibraryModule = () => {
               const file = e.target.files[0];
               if (!file) return;
               try {
-                const url = await uploadToCloudinary(file);
+                const url = await uploadToFirebase(file, "images/quotes");
                 setAppConfig((prev) => ({ ...prev, quoteImage: url }));
                 alert("✅ Quote image uploaded!");
               } catch (err) {
@@ -1879,7 +1879,7 @@ const renderLibraryModule = () => {
           const f = e.target.files[0];
           if (!f) return;
           try {
-            const url = await uploadToCloudinary(f);
+            const url = await uploadToFirebase(f, "images/logos");
             setAppConfig(prev => ({ ...prev, logoUrl: url }));
             alert("✅ Logo uploaded successfully!");
           } catch (err) {
@@ -2008,7 +2008,7 @@ const renderLibraryModule = () => {
               const file = e.target.files[0];
               if (!file) return;
               try {
-                const url = await uploadToCloudinary(file);
+                const url = await uploadToFirebase(file, "images/onboarding");
                 const updated = [...onboardingContent];
                 updated[idx].image = url;
                 setOnboardingContent(updated);
@@ -2351,7 +2351,7 @@ const renderLibraryModule = () => {
               if (!file) return;
               try {
                 setReformerForm(prev => ({...prev, uploading: true}));
-                const url = await uploadToCloudinary(file);
+                const url = await uploadToFirebase(file, "images/reformers");
                 setReformerForm(prev => ({...prev, image: url, uploading: false}));
               } catch (err) {
                 alert("Upload failed");
@@ -2589,10 +2589,10 @@ const renderLibraryModule = () => {
       </div>
     )}
 
-    {/* ===== UPLOAD BOOK (Cloudinary) ===== */}
+    {/* ===== UPLOAD BOOK (Firebase Storage) ===== */}
     {ebookSubTab === 'upload' && (
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
-        <h3 className="text-xs font-bold text-amber-400 uppercase">Upload eBook (Cloudinary)</h3>
+        <h3 className="text-xs font-bold text-amber-400 uppercase">Upload eBook (Firebase Storage)</h3>
 
         <select
           value={bookUploadForm.mahapurushId}
